@@ -1,10 +1,10 @@
 #include <iostream>
-using namespace std;
+
 
 int main() {
     int num, originalNum, remainder, result = 0;
-    cout << "Ingresa un numero positivo de 3 digitos: ";
-    cin >> num;
+    std::cout << "Ingresa un numero positivo de 3 digitos: ";
+    std::cin >> num;
     originalNum = num;
 
     while (originalNum != 0) {
@@ -18,9 +18,9 @@ int main() {
     }
 
     if (result == num)
-        cout << num << " Es un numero Armstrong.";
+        std::cout << num << " Es un numero Armstrong.";
     else
-        cout << num << " no Es un numero Armstrong.";
+        std::cout << num << " no Es un numero Armstrong.";
 
     return 0;
 }

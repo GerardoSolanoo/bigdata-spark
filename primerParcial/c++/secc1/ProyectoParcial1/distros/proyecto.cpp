@@ -1,28 +1,41 @@
-
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <cmath>
-
+#include <string>
 using namespace std;
 
-int main() {
-    int N = 231; // Longitud de los patrones
-    vector<vector<int>> patrones; // Matriz de patrones
-    vector<int> temp(N,0);
-    
-    // Leer patrones desde archivo
-    ifstream inputFile("patrones.txt");
-    while (inputFile >> temp[0]) {
-        for (int i = 1; i < N; i++) {
-            inputFile >> temp[i];
+// Definir la función readfile para cargar los patrones desde un archivo de texto externo
+void readfile(string filename, vector<vector<double>>& patrones) {
+    ifstream file(filename);
+    if (file.is_open()) {
+        string line;
+        while (getline(file, line)) {
+            vector<double> patron;
+            for (int i = 0; i < line.length(); i++) {
+                if (line[i] == '1') {
+                    patron.push_back(1.0);
+                } else if (line[i] == '0') {
+                    patron.push_back(-1.0);
+                }
+            }
+            patrones.push_back(patron);
         }
-        patrones.push_back(temp);
+        file.close();
+    } else {
+        cout << "Error al abrir el archivo." << endl;
     }
-    inputFile.close();
+}
+
+// Función principal
+int main() {
+    // Cargar los patrones del archivo 'patrones.txt'
+    vector<vector<double>> patrones;
+    readfile("patrones.txt", patrones);
     
     // Definir la matriz de conexión de Hopfield
-    vector<vector<int>> W(N, vector<int>(N, 0));
+    int N = patrones[0].size();
+    vector<vector<double>> W(N, vector<double>(N, 0.0));
     for (int i = 0; i < patrones.size(); i++) {
         for (int j = 0; j < N; j++) {
             for (int k = 0; k < N; k++) {
@@ -31,53 +44,31 @@ int main() {
         }
     }
     for (int i = 0; i < N; i++) {
-        W[i][i] = 0;
+        W[i][i] = 0.0;
     }
     
     // Recuperar un patrón a partir de un patrón ruidoso
-    vector<int> pat_noise(N, 0);
-    for (int i = 0; i < N; i++) {
-        pat_noise[i] = 2 * rand() % 2 - 1;
-    }
-    for (int i = 0; i < N; i++) {
-        int h = 0;
-        for (int j = 0; j < N; j++) {
-            h += W[i][j] * pat_noise[j];
-        }
-        pat_noise[i] = (h >= 0) ? 1 : -1;
-    }
-    vector<vector<int>> pat_recuperado(21, vector<int>(11, 0));
+    vector<vector<double>> noise(21, vector<double>(11, 0.0));
     for (int i = 0; i < 21; i++) {
         for (int j = 0; j < 11; j++) {
-            pat_recuperado[i][j] = pat_noise[i * 11 + j];
+            noise[i][j] = (2 * rand() % 2) - 1;
         }
+    }
+    vector<double> pat_noise(N, 0.0);
+    for (int i = 0; i < N; i++) {
+        double h = 0.0;
+        for (int j = 0; j < N; j++) {
+            h += W[i][j] * noise[j / 11][j % 11];
+        }
+        pat_noise[i] = (h >= 0.0) ? 1.0 : -1.0;
+    }
+    vector<vector<double>> pat_recuperado(21, vector<double>(11, 0.0));
+    for (int i = 0; i < N; i++) {
+        pat_recuperado[i / 11][i % 11] = pat_noise[i];
     }
     
     // Mostrar matrices de los patrones en la consola
     cout << "Matriz del patrón original:" << endl;
     for (int i = 0; i < 21; i++) {
         for (int j = 0; j < 11; j++) {
-            cout << patrones[0][i * 11 + j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-    
-    cout << "Matriz del patrón noising:" << endl;
-    for (int i = 0; i < 21; i++) {
-        for (int j = 0; j < 11; j++) {
-            cout << pat_noise[i * 11 + j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-    
-    cout << "Matriz del patrón recuperado:" << endl;
-    for (int i = 0; i < 21; i++) {
-        for(int j =0; j<21; j++){
-            cout << pat_recuperado[i][j] << " ";
-        }
-        cout << endl;
-    }
-        
-}
+            cout << patrones[0][i * 11 + j] << "
